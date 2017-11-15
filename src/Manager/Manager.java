@@ -2,13 +2,12 @@ package Manager;
 
 import java.time.*;
 import java.util.ArrayList;
-import java.util.Iterator;
 
 // Manager is a singleton class and its function is manage the list of services
 public class Manager {
     private static Manager singleton = new Manager();
-    private static ArrayList<Service> imc = new ArayList<>();
-    private static ArrayList<Service> average = new ArayList<>();
+    private static ArrayList<Service> imc = new ArrayList<>();
+    private static ArrayList<Service> average = new ArrayList<>();
     private static ArrayList<Service> translate = new ArrayList<>();
 
     private static int last_imc = 0;
@@ -48,11 +47,13 @@ public class Manager {
                     return average.get(index);
                 case "trs":
                     return translate.get(index);
+                default:
+                    return null;
             }
         }
     }
 
-    private static int choose(string type) {
+    private static int choose(String type) {
         switch (type) {
             case "imc":
                 if (imc.isEmpty()) {
@@ -81,6 +82,8 @@ public class Manager {
                     last_translate++;
                     return last_translate;
                 }
+            default:
+                return -1;
         }
     }
 
@@ -114,7 +117,7 @@ public class Manager {
     }
 
     private static boolean isOld(LocalTime t1, LocalTime t2, long maxMinutes) {
-        Duration duration = Duration(t1, t2);
+        Duration duration = Duration.between(t1, t2);
         long minutes = duration.toMinutes();
 
         if (minutes > maxMinutes) {
