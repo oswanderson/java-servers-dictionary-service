@@ -1,7 +1,4 @@
-package Server;
-
-import Manager.Dictionary;
-import Manager.Service;
+package Manager;
 
 public class Protocol {
     private String TYPE;
@@ -18,24 +15,30 @@ public class Protocol {
     }
     
     public String process(){
-        String[] c = this.CONTENT.split("\n");
-        if (c.length < 2) {
+        try {
+            String[] c = this.CONTENT.split("\n");
+            if (c.length < 2) {
+                return "";
+            } else {
+                this.TYPE = c[0];
+            }
+            
+            switch (this.TYPE){
+                case SERVICE_REGISTRATION:
+                    break;
+                case SERVICE_SEARCH:
+                    Dictionary d = new Dictionary();
+                    break;
+                default:
+                    this.VALID = false;
+                    break;
+            }
             return "";
-        } else {
-            this.TYPE = c[0];
+            
+        } catch(Exception e) {
+            
         }
         
-        switch (this.TYPE){
-            case SERVICE_REGISTRATION:
-                
-                break;
-            case SERVICE_SEARCH:
-                Dictionary d = new Dictionary();
-                break;
-            default:
-                this.VALID = false;
-                break;
-        }
         return "";
     }
     

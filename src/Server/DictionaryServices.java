@@ -17,6 +17,8 @@ public class DictionaryServices {
             System.out.println(e.toString());
         }
         
+        Manager manager = Manager.getInstance();
+        
         while (true){
             try{
                 ConnectionHandler ch = new ConnectionHandler(server.accept());

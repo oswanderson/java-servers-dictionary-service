@@ -5,7 +5,7 @@ import java.util.ArrayList;
 
 // Manager is a singleton class and its function is manage the list of services
 public class Manager {
-    private static Manager singleton = new Manager();
+    private static final Manager SINGLETON = new Manager();
     private static ArrayList<Service> imc = new ArrayList<>();
     private static ArrayList<Service> average = new ArrayList<>();
     private static ArrayList<Service> translate = new ArrayList<>();
@@ -17,7 +17,7 @@ public class Manager {
     private Manager() { }
     
     public static synchronized Manager getInstance() {
-        return singleton;
+        return SINGLETON;
     }
     
     public static synchronized void addService(String type, Service service) {
@@ -53,7 +53,7 @@ public class Manager {
         }
     }
 
-    private static int choose(String type) {
+    private static synchronized int choose(String type) {
         switch (type) {
             case "imc":
                 if (imc.isEmpty()) {
@@ -120,9 +120,6 @@ public class Manager {
         Duration duration = Duration.between(t1, t2);
         long minutes = duration.toMinutes();
 
-        if (minutes > maxMinutes) {
-            return true;
-        }
-        return false;
+        return minutes > maxMinutes;
     }
 }

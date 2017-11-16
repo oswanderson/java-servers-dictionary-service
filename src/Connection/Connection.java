@@ -16,21 +16,20 @@ public class Connection {
     
     public String read(){
         String content = "";
-        try{
-            InputStream in = this.socket.getInputStream();
+        try (InputStream in = this.socket.getInputStream()) {
             byte[] buffer = new byte[206];
             while(in.read(buffer) != -1){
                 content += new String(buffer);
             }
         }catch (IOException e) {
             System.out.println(e.toString());
+            return "";
         }
         return content;
     }
     
     public boolean write(String content){
-        try {
-            OutputStream out = this.socket.getOutputStream();
+        try (OutputStream out = this.socket.getOutputStream()){
             out.write(content.getBytes());
             this.socket.close();
         } catch(IOException e) {

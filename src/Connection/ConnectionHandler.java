@@ -1,6 +1,6 @@
 package Connection;
 
-import Server.Protocol;
+import Manager.Protocol;
 import java.net.Socket;
 
 public class ConnectionHandler implements Runnable{
