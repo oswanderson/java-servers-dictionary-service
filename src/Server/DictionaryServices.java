@@ -17,12 +17,14 @@ public class DictionaryServices {
             System.out.println(e.toString());
         }
         
-        Manager manager = Manager.getInstance();
+        Manager m = Manager.getInstance();
+        Watcher w = new Watcher(1 * 20 * 1000, 1);
+        w.start();
         
         while (true){
             try{
-                ConnectionHandler ch = new ConnectionHandler(server.accept());
-                ch.run();
+                ConnectionHandler ch = new ConnectionHandler(server.accept(), "server");
+                ch.start();
             }catch(IOException e){
                 System.out.println(e.getMessage());
             }

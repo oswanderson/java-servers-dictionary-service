@@ -8,18 +8,19 @@ import java.net.Socket;
 public class Connection {
     private Socket socket;
     
-    public Connection(){}
-    
     public Connection(Socket socket){
         this.socket = socket;
     }
     
     public String read(){
         String content = "";
-        try (InputStream in = this.socket.getInputStream()) {
-            byte[] buffer = new byte[206];
-            while(in.read(buffer) != -1){
-                content += new String(buffer);
+        try {
+            int i;
+            InputStream in = this.socket.getInputStream();
+            byte[] buffer = new byte[512];
+            int n = in.read(buffer);
+            if(n != -1) {
+                content += new String(buffer, 0, n);
             }
         }catch (IOException e) {
             System.out.println(e.toString());
@@ -29,11 +30,12 @@ public class Connection {
     }
     
     public boolean write(String content){
-        try (OutputStream out = this.socket.getOutputStream()){
+        OutputStream out;
+        try {
+            out = this.socket.getOutputStream();
             out.write(content.getBytes());
-            this.socket.close();
         } catch(IOException e) {
-            System.out.println(e.toString());
+            System.out.println("ERROR WHEN WRITING TO CONN: " + e.toString());
         }
         return true;
     }
@@ -44,5 +46,14 @@ public class Connection {
     
     public void setSocket(Socket socket){
         this.socket = socket;
+    }
+    
+    public boolean close() {
+        try {
+            this.socket.close();
+            return true;
+        } catch (IOException ex) {
+            return false;
+        }
     }
 }

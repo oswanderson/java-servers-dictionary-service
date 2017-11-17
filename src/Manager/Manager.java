@@ -3,16 +3,16 @@ package Manager;
 import java.time.*;
 import java.util.ArrayList;
 
-// Manager is a singleton class and its function is manage the list of services
+// Manager is a singleton class and its function is manage the services
 public class Manager {
     private static final Manager SINGLETON = new Manager();
-    private static ArrayList<Service> imc = new ArrayList<>();
+    private static ArrayList<Service> bmi = new ArrayList<>();
     private static ArrayList<Service> average = new ArrayList<>();
-    private static ArrayList<Service> translate = new ArrayList<>();
+    private static ArrayList<Service> translation = new ArrayList<>();
 
-    private static int last_imc = 0;
+    private static int last_bmi = 0;
     private static int last_average = 0;
-    private static int last_translate = 0;
+    private static int last_translation = 0;
     
     private Manager() { }
     
@@ -20,85 +20,101 @@ public class Manager {
         return SINGLETON;
     }
     
-    public static synchronized void addService(String type, Service service) {
+    public synchronized void addService(String type, Service s) {
         switch (type) {
-            case "imc":
-                imc.add(service);
+            case "bmi":
+                verifyBMIService(s);
                 break;
             case "avg":
-                average.add(service);
+                verifyAVGService(s);
                 break;
             case "trs":
-                translate.add(service);
+                verifyTRSService(s);
                 break;
         }
     }
 
-    public static synchronized Service getService(String type) {
+    public synchronized Service getService(String type) {
         int index = choose(type);
 
         if (index == -1) {
             return null;
         } else {
             switch (type) {
-                case "imc":
-                    return imc.get(index);
+                case "bmi":
+                    return bmi.get(index);
                 case "avg":
                     return average.get(index);
                 case "trs":
-                    return translate.get(index);
-                default:
-                    return null;
+                    return translation.get(index);
             }
         }
+        
+        return null;
     }
 
-    private static synchronized int choose(String type) {
+    private synchronized int choose(String type) {
         switch (type) {
-            case "imc":
-                if (imc.isEmpty()) {
+            case "bmi":
+                if (bmi.isEmpty()) {
+                    last_bmi = 0;
                     return -1;
-                } else if (imc.size() == last_imc) {
+                } else if (bmi.size() == last_bmi) {
+                    last_bmi = 0;
                     return 0;
                 } else {
-                    last_imc++;
-                    return last_imc;
+                    last_bmi++;
+                    return last_bmi;
                 }
             case "avg":
                 if (average.isEmpty()) {
+                    last_average = 0;
                     return -1;
-                } else if (average.size() == last_average) {
+                } else if (average.size() - 1 == last_average) {
+                    last_average = 0;
                     return 0;
                 } else {
                     last_average++;
                     return last_average;
                 }
             case "trs":
-                if (translate.isEmpty()) {
+                if (translation.isEmpty()) {
+                    last_translation = 0;
                     return -1;
-                } else if (translate.size() == last_translate) {
+                } else if (translation.size() == last_translation) {
+                    last_translation = 0;
                     return 0;
                 } else {
-                    last_translate++;
-                    return last_translate;
+                    last_translation++;
+                    return last_translation;
                 }
             default:
                 return -1;
         }
     }
 
-    public static synchronized void removeOld(int minutes) {
-        long maxMinutes = 3;
+    private boolean isOld(LocalTime t1, LocalTime t2, long maxMinutes) {
+        Duration duration = Duration.between(t1, t2);
+        long minutes = duration.toMinutes();
+
+        return minutes > maxMinutes;
+    }
+    
+    public synchronized void removeOld(int minutes) {
+        long maxMinutes = minutes;
         LocalTime now = LocalTime.now();
         ArrayList<Service> toRemove = new ArrayList<>();
 
-        for (Service s : imc) {
+        System.out.println("BMI: " + bmi.size());
+        for (Service s : bmi) {
             if (isOld(s.getLastRegistration(), now, maxMinutes)) {
                 toRemove.add(s);
             }
         }
-        imc.removeAll(toRemove);
+        bmi.removeAll(toRemove);
+        System.out.println("BMI: " + bmi.size());
 
+        System.out.println("AVG: " + average.size());
         toRemove.clear();
         for (Service s : average) {
             if (isOld(s.getLastRegistration(), now, maxMinutes)) {
@@ -106,20 +122,64 @@ public class Manager {
             }
         }
         average.removeAll(toRemove);
+        System.out.println("AVG: " + average.size());
 
+        System.out.println("TRS: " + translation.size());
         toRemove.clear();
-        for (Service s : translate) {
+        for (Service s : translation) {
             if (isOld(s.getLastRegistration(), now, maxMinutes)) {
                 toRemove.add(s);
             }
         }
-        translate.removeAll(toRemove);
+        translation.removeAll(toRemove);
+        System.out.println("TRS: " + translation.size());
     }
-
-    private static boolean isOld(LocalTime t1, LocalTime t2, long maxMinutes) {
-        Duration duration = Duration.between(t1, t2);
-        long minutes = duration.toMinutes();
-
-        return minutes > maxMinutes;
+    
+    private synchronized void verifyBMIService(Service s) {
+        boolean exist = false;
+        
+        for (int i = 0; i < bmi.size(); i++) {
+            if (bmi.get(i).getIP().equals(s.getIP())
+                    && bmi.get(i).getPort().equals(s.getPort())) {
+                bmi.get(i).setLastRegistration(LocalTime.now());
+                exist = true;
+            }
+        }
+        
+        if (!exist) {
+            bmi.add(s);
+        }
+    }
+    
+    private synchronized void verifyAVGService(Service s) {
+        boolean exist = false;
+        
+        for (int i = 0; i < average.size(); i++) {
+            if (average.get(i).getIP().equals(s.getIP())
+                    && average.get(i).getPort().equals(s.getPort())) {
+                average.get(i).setLastRegistration(LocalTime.now());
+                exist = true;
+            }
+        }
+        
+        if (!exist) {
+            average.add(s);
+        }
+    }
+    
+    private synchronized void verifyTRSService(Service s) {
+        boolean exist = false;
+        
+        for (int i = 0; i < translation.size(); i++) {
+            if (translation.get(i).getIP().equals(s.getIP())
+                    && translation.get(i).getPort().equals(s.getPort())) {
+                translation.get(i).setLastRegistration(LocalTime.now());
+                exist = true;
+            }
+        }
+        
+        if (!exist) {
+            translation.add(s);
+        }
     }
 }

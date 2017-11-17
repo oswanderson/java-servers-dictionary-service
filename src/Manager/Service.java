@@ -1,12 +1,11 @@
 package Manager;
 
 import java.time.LocalTime;
-import java.util.Date;
 
 public class Service {
-    private String type;
-    private String ip;
-    private String port;
+    private final String type;
+    private final String ip;
+    private final String port;
     private LocalTime lastRegistration;
     
     public Service(String type, String ip, String port){
