@@ -16,7 +16,7 @@ public class Average {
             ServerSocket server = new ServerSocket(port);
             
             // Host
-            Socket host = new Socket("localhost", 3002);
+            Socket host = new Socket("localhost", 3001);
             
             AverageRunner runner = new AverageRunner(server, host);
             runner.run();

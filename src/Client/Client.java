@@ -19,6 +19,8 @@ public class Client {
                 System.out.println("ERROR: " + e.getMessage());
             }
             
+            String service;
+            
             switch(option) {
                 // Exit
                 case 0:
@@ -27,10 +29,10 @@ public class Client {
                 // Dictionary
                 case 1:
                     System.out.println("Choose a service...");
-                    String serviceType = showPanel(1, "Choose a service", getMessage("servicesOptions"));
+                    service = showPanel(1, "Choose a service", getMessage("servicesOptions"));
                     
                     try {
-                        option = Integer.parseInt(serviceType);
+                        option = Integer.parseInt(service);
                         dictionary(option);
                     } catch(NumberFormatException e) {
                         System.out.println("ERROR: " + e.getMessage());
@@ -40,6 +42,16 @@ public class Client {
                 // Service
                 case 2:
                     System.out.println("Consume service...");
+                    service = showPanel(1, "Choose a service", getMessage("servicesOptions"));
+                    try {
+                        option = Integer.parseInt(service);
+                        String ip = showPanel(1, "Service IP", "");
+                        int port = Integer.parseInt(showPanel(1, "Service Port", ""));
+                        consumeService(option, ip, port);
+                    } catch(NumberFormatException e) {
+                        showPanel(-1, "", "Error when creating request");
+                        System.out.println("ERROR: " + e.getLocalizedMessage());
+                    }
                     break;
                 default:
                     showPanel(-1, "", "Invalid option!");
@@ -87,8 +99,42 @@ public class Client {
         }
     }
     
-    public static void consumeService(int type){
-        
+    public static void consumeService(int type, String host, int port){
+        try (Socket socket = new Socket(host, port)) {
+            String body = "";
+            
+            switch(type) {
+                // Average service
+                case 1:
+                    body += showPanel(1, "Average - Type your numbers", getMessage("avgService"));
+                    break;
+                // BMI service
+                case 2:
+                    body += "bmi";
+                    break;
+                // Translation service
+                case 3:
+                    body += "trs";
+                    break;
+                default:
+                    showPanel(-1, "", "Invalid option!");
+                    return;
+            }
+            
+            Connection conn = new Connection(socket);
+            
+            if (conn.write(body)) {
+                String response = conn.read();
+                showPanel(0, "Service response", response);
+                conn.close();
+            } else {
+                showPanel(-1, "", "Error when trying to send data to server...");
+                conn.close();
+            }
+            
+        } catch(IOException e) {
+            showPanel(-1, "", "Error when trying to connect to server...");
+        }
     }
     
     public static String getMessage(String type) {
@@ -97,10 +143,16 @@ public class Client {
                 return "1 - Dictionary\n2 - Service\n0 - Exit";
             case "servicesOptions":
                 return "1 - Average\n2 - BMI\n3 - Translation";
-            case "serviceIP":
+            case "avgInput":
+                return "Use ';' as delimiter";
+            case "bmiInput":
                 return "";
-            case "servicePort":
+            case "trsInput":
                 return "";
+            case "ipInput":
+                return "Type the service ip";
+            case "portInput":
+                return "Type the service port";
             default:
                 return "";
         }
@@ -115,7 +167,8 @@ public class Client {
                 return "";
             // Show message
             case 0:
-                JOptionPane.showMessageDialog(null, message);
+                JOptionPane.showMessageDialog(null, message,
+                        title, JOptionPane.PLAIN_MESSAGE);
                 return "";
             // Show input
             case 1:

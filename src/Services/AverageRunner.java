@@ -28,9 +28,10 @@ public class AverageRunner {
                 System.out.println("Average Server running on " + this.server.getLocalPort());
                 
                 Socket conn = this.server.accept();
-                ConnectionHandler ch = new ConnectionHandler(conn, "average");
                 System.out.println("Connection received...");
-                ch.run();
+                
+                ConnectionHandler ch = new ConnectionHandler(conn, "average");
+                ch.start();
             } catch(IOException e) {
                 System.out.println("ERROR: " + e.getMessage());
             }

@@ -58,8 +58,36 @@ public class ConnectionHandler extends Thread{
     
     private void average() {
         Connection conn = new Connection(this.socket);
-        conn.write("From Average...");
+        String content = conn.read();
+        System.out.println("Content from connection: " + content);
+        
+        try {
+            String[] numberList = content.split(";");
+            if(numberList.length < 2) {
+                conn.write("The amount of numbers must be at least 2...");
+                conn.close();
+                return;
+            }
+            
+            Double[] numbers = new Double[numberList.length];
+            for (int i = 0; i < numbers.length; i++) {
+                numbers[i] = Double.parseDouble(numberList[i]);
+            }
+            
+            conn.write("" + calcAverage(numbers));
+        } catch(NumberFormatException e) {
+            conn.write("Invalid format of numbers list.");
+        }
         conn.close();
+    }
+    
+    private Double calcAverage(Double[] numbers){
+        Double sum = 0.0;
+        for (Double n : numbers) {
+            sum += n;
+        }
+        
+        return sum / numbers.length;
     }
     
     private void bmi() {
